@@ -1,0 +1,72 @@
+Vagrant.configure('2') do |config|
+        config.vm.box = "ubuntu/xenial64"
+        # config.vm.box_check_update = false
+        config.vm.hostname = "server"
+        config.vm.define "server"
+        # config.vm.synced_folder "../data", "/vagrant_data"
+	config.vm.network "public_network"
+        # config.vm.network "private_network", ip: "192.168.33.10"
+        # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+        # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+
+config.vm.provider :virtualbox do |vb|
+        vb.name = "server-host"
+        vb.gui = false
+        vb.memory = "3072"
+  	end
+
+config.vm.provision "shell", inline: <<-SHELL
+        sudo su
+	apt-get update
+        apt-get install -y apache2
+        echo "This is the script to install basic software in ubuntu"
+echo "******* MAKE SURE USER IS ROOT ********"
+
+echo "******* update ********"
+apt-get update -y
+echo "******* upgrade ********"
+apt-get upgrade -y
+echo "******* Installing vim ********"
+#vim
+apt-get install vim -y
+#tree
+echo "******* Installing tree ********"
+apt-get install tree -y
+#ansible
+echo "******* Installing ansible ********"
+apt-get update -y
+apt-get install software-properties-common -y
+apt-add-repository ppa:ansible/ansible -y
+apt-get update -y
+apt-get install ansible -y
+#java
+echo "******* Installing java ********"
+apt-get install openjdk-8-jdk -y
+#jenkins
+echo "******* Installing jenkins ********"
+wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | apt-key add -
+sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+apt-get update -y
+apt-get install jenkins -y
+#docker
+echo "******* Installing docker ********"
+apt-get update -y
+apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg2 \
+    software-properties-common -y
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+apt-key fingerprint 0EBFCD88
+add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+apt-get update -y
+apt-get install docker-ce -y
+
+echo "******** installation successfull ************"
+       SHELL
+end
